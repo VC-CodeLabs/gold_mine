@@ -52,14 +52,13 @@ Input:<br>
 
 Output: 83
 
-<br>
-<br>
-**Constraints**
+<br>**Constraints**
 - all integers will be 0 or greater, no negatives
 - All arrays will be the same length for a single input
 - Max value for any input will be 9872
-- max size 1000x1000<br>
- 
+- max size 1000x1000
+<br><br>
+
 📤 Submission Guidelines Fork the Repository: Begin by forking the challenge repository. This will be your staging ground for greatness.<br> 
 **Code Your Solution**: All submissions must be in **GO**.<br>
 **Naming Convention**: Name your solution file using the following convention: <your_name>_solution.go. <br>
