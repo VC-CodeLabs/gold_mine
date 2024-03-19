@@ -27,31 +27,7 @@ public class JeffR_GoldMine
             }
         }
 
-        for( int r = 0; r < rows; r++ ) {
-            System.out.print("{ ");
-            for( int c = 0; c < cols; c++ ) {
-                String dir = "|";
-                String delim = ", ";
-                int max = Math.max( Math.max( nodes[r][c].up, nodes[r][c].rt), nodes[r][c].dn );
-                boolean up = max == nodes[r][c].up;
-                boolean rt = max == nodes[r][c].rt;
-                boolean dn = max == nodes[r][c].dn;
-                if( c < lc )
-                {
-
-                }
-                else {
-                    delim = "";
-                    up = rt = dn = false;
-                }
-                System.out.printf( "%3d [%3d %3d %3d: %5d %c%c%c]%s", mine[r][c], nodes[r][c].up, nodes[r][c].rt, nodes[r][c].dn, max, 
-                    up ? '/' : ' ', 
-                    rt ? '-' : ' ', 
-                    dn ? '\\' : ' ', 
-                    delim);
-            }
-            System.out.println(" }");
-        }
+        dumpNodes(mine,nodes);
 
         for( int r = rows; r-- > 0; ) {
             for( int c = cols; c-- > 0; ) {
@@ -79,6 +55,24 @@ public class JeffR_GoldMine
             }
         }
 
+        dumpNodes(mine,nodes);
+
+    }
+
+
+
+    static class node 
+    {
+        int up; // up-and-right
+        int rt; // straight-right
+        int dn; // down-and-right
+    }
+
+    static void dumpNodes( int[][] mine, node[][] nodes ) {
+        System.out.println();
+        int rows = mine.length;
+        int cols = mine[0].length;
+        int lc = cols - 1;
         for( int r = 0; r < rows; r++ ) {
             System.out.print("{ ");
             for( int c = 0; c < cols; c++ ) {
@@ -104,22 +98,14 @@ public class JeffR_GoldMine
             }
             System.out.println(" }");
         }
+        System.out.println();
 
-    }
-
-
-
-    static class node 
-    {
-        int up; // up-and-right
-        int rt; // straight-right
-        int dn; // down-and-right
     }
 
     public static void main(String[] args) {
 
-        int[][] mineAllOnes = { { 1, 1, 1}, {1, 1, 1}, {1, 1, 1}};
-        dig( mineAllOnes );
+        // int[][] mineAllOnes = { { 1, 1, 1}, {1, 1, 1}, {1, 1, 1}};
+        // dig( mineAllOnes );
 
         int[][] mineSample = 
             { { 0, 0, 0, 9 },
