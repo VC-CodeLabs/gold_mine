@@ -29,8 +29,8 @@ public class JeffR_GoldMine
 
         dumpNodes(mine,nodes);
 
-        for( int r = rows; r-- > 0; ) {
-            for( int c = cols; c-- > 0; ) {
+        for( int c = cols; c-- > 0; ) {
+            for( int r = rows; r-- > 0; ) {
                 if( c < lc) {
                     nodes[r][c].up += 
                         r > 0 
@@ -52,6 +52,10 @@ public class JeffR_GoldMine
                 else {
                     // nodes
                 }
+
+                System.out.println( "r=" + r + " c=" + c + ":");
+
+                dumpNodes(mine,nodes);
             }
         }
 
