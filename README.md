@@ -12,46 +12,57 @@ As a daring miner, you start your journey in the first column of the mine, with 
 **🡦 Right-Down Diagonal**
 Your challenge is to find the maximum amount of gold you can collect by traversing the mine from the first column to the last, making strategic moves that will lead you to the wealthiest path.
 
+**Code Output**<br>
+The output of you solution should be an integer that returns the number of the most gold, highest value
 
+
+<br>
+<br>
 Example 1:
 
 Input:<br>
-{<br> 
-  {1, 3, 3},  
+{{1, 3, 3},  
   {2, 1, 4},  
-  {0, 6, 4}<br>
-}  
+  {0, 6, 4}}  
 
 Output: 12
-Path: (1,0) -> (2,1) -> (1,2)
 
 
+<br>
+<br>
 Example 2:
 
 Input:<br>
-{<br>{1, 3, 1, 5},  
+{{1, 3, 1, 5},  
 {2, 2, 4, 1},  
 {5, 0, 2, 3},  
-{0, 6, 1, 2}<br>}  
+{0, 6, 1, 2}}  
 
 Output: 16
-Paths: (2,0) -> (1,1) -> (1,2) -> (0,3) OR (2,0) -> (3,1) -> (2,2) -> (2,3)
 
+<br>
+<br>
 Example 3:
 
 Input:<br>
-{<br>{10, 33, 13, 15},  
+{{10, 33, 13, 15},  
 {22, 21, 04, 1},<br>
 {5, 0, 2, 3},  
-{0, 6, 14, 2}<br>}  
+{0, 6, 14, 2}}  
 
 Output: 83
 
-
-
+<br>
+<br>
+**Constraints**
+- all integers will be 0 or greater, no negatives
+- All arrays will be the same length for a single input
+- Max value for any input will be 9872
+- max size 1000x1000<br>
+ 
 📤 Submission Guidelines Fork the Repository: Begin by forking the challenge repository. This will be your staging ground for greatness.<br> 
-**Code Your Solution**: We will choose a language for all of us to use.<br>
-**Naming Convention**: Name your solution file using the following convention: <your_name>_solution.xyz. <br>
+**Code Your Solution**: All submissions must be in **GO**.<br>
+**Naming Convention**: Name your solution file using the following convention: <your_name>_solution.go. <br>
 **Merge Request**: Once confident in your epic solution, you can submit it by creating a merge request to the repository. Ensure your merge request title includes your name for easy identification.<br><br>
 
 🏆 Winner Selection Criteria <br>
