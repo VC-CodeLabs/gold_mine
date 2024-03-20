@@ -163,6 +163,17 @@ public class JeffR_GoldMine
                 System.out.print( " [" + rc.r + ", " + rc.c + "]");
             }
             System.out.println();
+            for( int r = 0; r < rows; r++ ) {
+                for( int c = 0; c < cols; c++ ) {
+                    int value = mine[r][c];
+                    if( path.contains(new coord(r,c)))
+                        System.out.printf( "\u001b[1m\u001b[103m\u001b[91m%3d\u001b[0m, ", value );
+                    else
+                        System.out.printf("%3d, ", value);
+                }
+                System.out.println();
+            }
+            System.out.println();
                 
         }
 
@@ -183,6 +194,21 @@ public class JeffR_GoldMine
         coord(int r, int c) {
             this.r = r;
             this.c = c;
+        }
+
+        @Override
+        public boolean equals(Object that) {
+            if( that instanceof coord ) {
+                coord thatCoord = (coord)that;
+                return thatCoord.r == this.r && thatCoord.c == this.c;
+            }
+
+            return false;
+        }
+
+        @Override
+        public int hashCode() {
+            return Integer.valueOf(Integer.valueOf(r) * 10000 + Integer.valueOf(c)).hashCode();
         }
     }
 
