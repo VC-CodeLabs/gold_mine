@@ -3,8 +3,9 @@ import java.util.ArrayList;
 
 public class JeffR_GoldMine
 {
+    static boolean FIND_PATHS = false;
 
-    static boolean USE_ANSI = true;
+    static boolean USE_ANSI = false;
     static String ANSI_GOLD_PREFIX = USE_ANSI ? "\u001b[1m\u001b[103m\u001b[91m" : "";
     static String ANSI_GOLD_SUFFIX = USE_ANSI ? "\u001b[0m" : "";
     
@@ -78,78 +79,84 @@ public class JeffR_GoldMine
             int maxStep = Math.max( Math.max( nodes[r][0].up, nodes[r][0].rt ), nodes[r][0].dn );
             if( maxStep > maxGold ) {
                 maxGold = maxStep;
-                paths.clear();
-                paths.add(new ArrayList<>());
-                paths.get(0).add(new coord(r,0));
+                if( FIND_PATHS ) {
+                    paths.clear();
+                    paths.add(new ArrayList<>());
+                    paths.get(0).add(new coord(r,0));
+                }
             }
             else if( maxStep == maxGold ) {
-                paths.add(new ArrayList<>());
-                paths.getLast().add(new coord(r,0));
+                if( FIND_PATHS ) {
+                    paths.add(new ArrayList<>());
+                    paths.getLast().add(new coord(r,0));
+                }
             }
         }
 
-        dumpNodes(mine,nodes);
+        // dumpNodes(mine,nodes);
 
         int maxPaths = 0;
-        if( maxGold > 0 ) {
-            maxPaths = 0;
-            for( int p = 0; p < paths.size(); p++ ) {
-                List<coord> path = paths.get(p);
-                int sum = 0;
-                for( int c = 0; c < cols; c++ ) {
-                    coord coords = path.get(c);
-                    if( c < path.size()) {
-                        sum += mine[coords.r][coords.c];    
-                    }
-                    if( c + 1 < cols && c + 1 == path.size()) {
-                        node nOde = nodes[coords.r][coords.c];
-                        int maxStep = Math.max( Math.max( nOde.up, nOde.rt ), nOde.dn );
-                        boolean up = maxStep == nOde.up;
-                        boolean rt = maxStep == nOde.rt;
-                        boolean dn = maxStep == nOde.dn;
-                        int subPaths = 0;
-                        subPaths += up ? 1 : 0;
-                        subPaths += rt ? 1 : 0;
-                        subPaths += dn ? 1 : 0;
-                        if( subPaths > 1 ) {
-                            if( up ) {
-                                if( rt ) {
-                                    List<coord> newPath = new ArrayList<>(path);
-                                    newPath.add(new coord(coords.r ,coords.c+1));
-                                    paths.add(newPath);
-                                }
+        if( FIND_PATHS ) {
+            if( maxGold > 0 ) {
+                maxPaths = 0;
+                for( int p = 0; p < paths.size(); p++ ) {
+                    List<coord> path = paths.get(p);
+                    int sum = 0;
+                    for( int c = 0; c < cols; c++ ) {
+                        coord coords = path.get(c);
+                        if( c < path.size()) {
+                            sum += mine[coords.r][coords.c];    
+                        }
+                        if( c + 1 < cols && c + 1 == path.size()) {
+                            node nOde = nodes[coords.r][coords.c];
+                            int maxStep = Math.max( Math.max( nOde.up, nOde.rt ), nOde.dn );
+                            boolean up = maxStep == nOde.up;
+                            boolean rt = maxStep == nOde.rt;
+                            boolean dn = maxStep == nOde.dn;
+                            int subPaths = 0;
+                            subPaths += up ? 1 : 0;
+                            subPaths += rt ? 1 : 0;
+                            subPaths += dn ? 1 : 0;
+                            if( subPaths > 1 ) {
+                                if( up ) {
+                                    if( rt ) {
+                                        List<coord> newPath = new ArrayList<>(path);
+                                        newPath.add(new coord(coords.r ,coords.c+1));
+                                        paths.add(newPath);
+                                    }
 
-                                if( dn ) {
+                                    if( dn ) {
+                                        List<coord> newPath = new ArrayList<>(path);
+                                        newPath.add(new coord(coords.r+1,coords.c+1));
+                                        paths.add(newPath);
+
+                                    }
+
+                                    path.add(new coord(coords.r-1,coords.c+1));
+                                }
+                                else if( rt ) {
+                                    // dn:
                                     List<coord> newPath = new ArrayList<>(path);
                                     newPath.add(new coord(coords.r+1,coords.c+1));
                                     paths.add(newPath);
 
+                                    path.add(new coord(coords.r ,coords.c+1));
+
+
                                 }
-
-                                path.add(new coord(coords.r-1,coords.c+1));
                             }
-                            else if( rt ) {
-                                // dn:
-                                List<coord> newPath = new ArrayList<>(path);
-                                newPath.add(new coord(coords.r+1,coords.c+1));
-                                paths.add(newPath);
-
-                                path.add(new coord(coords.r ,coords.c+1));
-
-
+                            else {
+                                if( up )
+                                    path.add(new coord(coords.r-1,coords.c+1));
+                                else if( rt ) 
+                                    path.add(new coord(coords.r ,coords.c+1));
+                                else // dn
+                                    path.add(new coord(coords.r+1,coords.c+1));
                             }
-                        }
-                        else {
-                            if( up )
-                                path.add(new coord(coords.r-1,coords.c+1));
-                            else if( rt ) 
-                                path.add(new coord(coords.r ,coords.c+1));
-                            else // dn
-                                path.add(new coord(coords.r+1,coords.c+1));
                         }
                     }
+                    assert(sum == maxGold);
                 }
-                assert(sum == maxGold);
             }
         }
 
@@ -158,29 +165,32 @@ public class JeffR_GoldMine
         if( maxGold == 0 )
             System.out.println( "The mine is devoid of gold??");
         else
-            System.out.println("Max gold " + ANSI_GOLD_PREFIX + maxGold + ANSI_GOLD_SUFFIX + " in " + maxPaths + " path(s).");
+            System.out.println("Max gold " 
+                + ANSI_GOLD_PREFIX + maxGold + ANSI_GOLD_SUFFIX 
+                + ( FIND_PATHS ? " in " + maxPaths + " path(s)." : ""));
 
-        for( int p = 0; p < maxPaths; p++ ) {
-            System.out.print("Path #" + p + ":");
-            List<coord> path = paths.get(p);
-            for( int s = 0; s < path.size(); s++ ) {
-                coord rc = path.get(s);
-                System.out.print( " [" + rc.r + ", " + rc.c + "]");
-            }
-            System.out.println();
-            for( int r = 0; r < rows; r++ ) {
-                for( int c = 0; c < cols; c++ ) {
-                    int value = mine[r][c];
-                    if( path.contains(new coord(r,c)))
-                        System.out.printf( "%s%5d%s, ", ANSI_GOLD_PREFIX, value, ANSI_GOLD_SUFFIX );
-                    else
-                        System.out.printf("%5d, ", value);
+        if( FIND_PATHS )                
+            for( int p = 0; p < maxPaths; p++ ) {
+                System.out.print("Path #" + p + ":");
+                List<coord> path = paths.get(p);
+                for( int s = 0; s < path.size(); s++ ) {
+                    coord rc = path.get(s);
+                    System.out.print( " [" + rc.r + ", " + rc.c + "]");
                 }
                 System.out.println();
+                for( int r = 0; r < rows; r++ ) {
+                    for( int c = 0; c < cols; c++ ) {
+                        int value = mine[r][c];
+                        if( path.contains(new coord(r,c)))
+                            System.out.printf( "%s%5d%s, ", ANSI_GOLD_PREFIX, value, ANSI_GOLD_SUFFIX );
+                        else
+                            System.out.printf("%5d, ", value);
+                    }
+                    System.out.println();
+                }
+                System.out.println();
+                    
             }
-            System.out.println();
-                
-        }
 
     }
 
