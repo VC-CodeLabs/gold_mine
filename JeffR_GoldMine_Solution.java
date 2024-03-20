@@ -3,9 +3,9 @@ import java.util.ArrayList;
 
 public class JeffR_GoldMine
 {
-    static boolean FIND_PATHS = false;
+    static boolean FIND_PATHS = true;
 
-    static boolean USE_ANSI = false;
+    static boolean USE_ANSI = true;
     static String ANSI_GOLD_PREFIX = USE_ANSI ? "\u001b[1m\u001b[103m\u001b[91m" : "";
     static String ANSI_GOLD_SUFFIX = USE_ANSI ? "\u001b[0m" : "";
     
@@ -41,19 +41,19 @@ public class JeffR_GoldMine
                 if( c < lc) {
                     nodes[r][c].up += 
                         r > 0 
-                        ?   ( c == 0 ? mine[r][c] : 0 ) 
+                        ?   0 // ( c == 0 ? mine[r][c] : 0 ) 
                             + Math.max( Math.max( nodes[r-1][c+1].up, nodes[r-1][c+1].rt ), nodes[r-1][c+1].dn )
                         : 0
                         ;
 
                     nodes[r][c].rt += 
-                            ( c == 0 ? mine[r][c] : 0 ) 
+                            0 // ( c == 0 ? mine[r][c] : 0 ) 
                             + Math.max( Math.max( nodes[r  ][c+1].up, nodes[r  ][c+1].rt ), nodes[r  ][c+1].dn )
                           ;
 
                     nodes[r][c].dn +=
                         r < lr
-                        ?   ( c == 0 ? mine[r][c] : 0 )     
+                        ?   0 // ( c == 0 ? mine[r][c] : 0 )     
                             +  Math.max( Math.max( nodes[r+1][c+1].up, nodes[r+1][c+1].rt ), nodes[r+1][c+1].dn )  
                         : 0
                         ;                        
@@ -71,7 +71,19 @@ public class JeffR_GoldMine
             }
         }
 
-        // dumpNodes(mine,nodes);
+        for( int r = 0; r < rows; r++ ) {
+            for( int c = 0; c < cols; c++ ) {
+                if( r > 0 )
+                    nodes[r][c].up += mine[r][c];
+                
+                nodes[r][c].rt += mine[r][c];
+
+                if( r < lr)
+                    nodes[r][c].dn += mine[r][c];
+            }
+        }
+
+        dumpNodes(mine,nodes);
 
         int maxGold = -1;
         List<List<coord>> paths = new ArrayList<>();
@@ -263,7 +275,12 @@ public class JeffR_GoldMine
 
     public static void main(String[] args) {
 
-        int[][] mineAllOnes = { { 1, 1, 1}, {1, 1, 1}, {1, 1, 2}};
+        int[][] mineAllOnes = 
+        { 
+            { 1, 1, 1 }, 
+            { 1, 1, 1 }, 
+            { 1, 1, 2 }
+        };
         dig( mineAllOnes );
 
         int[][] mineSample = 
@@ -275,5 +292,14 @@ public class JeffR_GoldMine
             };
 
         dig(mineSample);
+
+        int[][] justOne = 
+            {
+                {0,0,1},
+                {0,0,0},
+                {0,0,0}
+            };
+
+        dig(justOne);
     }
 }
