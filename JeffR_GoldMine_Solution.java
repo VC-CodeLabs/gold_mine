@@ -27,24 +27,27 @@ public class JeffR_GoldMine
             }
         }
 
-        dumpNodes(mine,nodes);
+        // dumpNodes(mine,nodes);
 
         for( int c = cols; c-- > 0; ) {
             for( int r = rows; r-- > 0; ) {
                 if( c < lc) {
                     nodes[r][c].up += 
                         r > 0 
-                        ? Math.max( Math.max( nodes[r-1][c+1].up, nodes[r-1][c+1].rt ), nodes[r-1][c+1].dn )
+                        ?   ( c == 0 ? mine[r][c] : 0 ) 
+                            + Math.max( Math.max( nodes[r-1][c+1].up, nodes[r-1][c+1].rt ), nodes[r-1][c+1].dn )
                         : 0
                         ;
 
                     nodes[r][c].rt += 
-                          Math.max( Math.max( nodes[r  ][c+1].up, nodes[r  ][c+1].rt ), nodes[r  ][c+1].dn )
+                            ( c == 0 ? mine[r][c] : 0 ) 
+                            + Math.max( Math.max( nodes[r  ][c+1].up, nodes[r  ][c+1].rt ), nodes[r  ][c+1].dn )
                           ;
 
                     nodes[r][c].dn +=
                         r < lr
-                        ? Math.max( Math.max( nodes[r+1][c+1].up, nodes[r+1][c+1].rt ), nodes[r+1][c+1].dn )  
+                        ?   ( c == 0 ? mine[r][c] : 0 )     
+                            +  Math.max( Math.max( nodes[r+1][c+1].up, nodes[r+1][c+1].rt ), nodes[r+1][c+1].dn )  
                         : 0
                         ;                        
 
@@ -53,13 +56,33 @@ public class JeffR_GoldMine
                     // nodes
                 }
 
+                /*
                 System.out.println( "r=" + r + " c=" + c + ":");
 
                 dumpNodes(mine,nodes);
+                */
             }
         }
 
-        dumpNodes(mine,nodes);
+        // dumpNodes(mine,nodes);
+
+        int maxGold = -1;
+        int maxPaths = 0;
+        for( int r = 0; r < rows; r++ ) {
+            int maxStep = Math.max( Math.max( nodes[r][0].up, nodes[r][0].rt ), nodes[r][0].dn );
+            if( maxStep > maxGold ) {
+                maxGold = maxStep;
+                maxPaths = 1;
+            }
+            else if( maxStep == maxGold ) {
+                maxPaths++;
+            }
+        }
+
+        if( maxGold == 0 )
+            System.out.println( "The mine is devoid of gold??");
+        else
+            System.out.println("Max gold " + maxGold + " in " + maxPaths + " path(s).");
 
     }
 
