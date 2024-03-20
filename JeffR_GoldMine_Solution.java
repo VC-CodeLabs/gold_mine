@@ -71,6 +71,7 @@ public class JeffR_GoldMine
             }
         }
 
+        /*
         for( int r = 0; r < rows; r++ ) {
             for( int c = 0; c < cols; c++ ) {
                 if( r > 0 )
@@ -82,13 +83,14 @@ public class JeffR_GoldMine
                     nodes[r][c].dn += mine[r][c];
             }
         }
+        */
 
         dumpNodes(mine,nodes);
 
         int maxGold = -1;
         List<List<coord>> paths = new ArrayList<>();
         for( int r = 0; r < rows; r++ ) {
-            int maxStep = Math.max( Math.max( nodes[r][0].up, nodes[r][0].rt ), nodes[r][0].dn );
+            int maxStep = mine[r][0] + Math.max( Math.max( nodes[r][0].up, nodes[r][0].rt ), nodes[r][0].dn );
             if( maxStep > maxGold ) {
                 maxGold = maxStep;
                 if( FIND_PATHS ) {
@@ -297,7 +299,7 @@ public class JeffR_GoldMine
             {
                 {0,0,1},
                 {0,0,0},
-                {0,0,0}
+                {1,0,0}
             };
 
         dig(justOne);
