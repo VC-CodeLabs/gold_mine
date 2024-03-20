@@ -108,7 +108,6 @@ public class JeffR_GoldMine
                         subPaths += dn ? 1 : 0;
                         if( subPaths > 1 ) {
                             if( up ) {
-                                path.add(new coord(coords.r-1,coords.c+1));
                                 if( rt ) {
                                     List<coord> newPath = new ArrayList<>(path);
                                     newPath.add(new coord(coords.r ,coords.c+1));
@@ -121,13 +120,16 @@ public class JeffR_GoldMine
                                     paths.add(newPath);
 
                                 }
+
+                                path.add(new coord(coords.r-1,coords.c+1));
                             }
                             else if( rt ) {
-                                path.add(new coord(coords.r ,coords.c+1));
                                 // dn:
                                 List<coord> newPath = new ArrayList<>(path);
                                 newPath.add(new coord(coords.r+1,coords.c+1));
                                 paths.add(newPath);
+
+                                path.add(new coord(coords.r ,coords.c+1));
 
 
                             }
@@ -220,12 +222,12 @@ public class JeffR_GoldMine
 
     public static void main(String[] args) {
 
-        // int[][] mineAllOnes = { { 1, 1, 1}, {1, 1, 1}, {1, 1, 1}};
-        // dig( mineAllOnes );
+        int[][] mineAllOnes = { { 1, 1, 1}, {1, 1, 1}, {1, 1, 1}};
+        dig( mineAllOnes );
 
         int[][] mineSample = 
             { 
-            { 0, 0, 0, 9 },
+            { 0, 0, 0, 10 },
             { 0, 0, 0, 0 },
             { 0, 0, 0, 0 },
             { 1, 1, 1, 8 }
