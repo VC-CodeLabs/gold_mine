@@ -1,4 +1,5 @@
-
+import java.util.List;
+import java.util.ArrayList;
 
 public class JeffR_GoldMine
 {
@@ -67,22 +68,101 @@ public class JeffR_GoldMine
         // dumpNodes(mine,nodes);
 
         int maxGold = -1;
-        int maxPaths = 0;
+        List<List<coord>> paths = new ArrayList<>();
         for( int r = 0; r < rows; r++ ) {
             int maxStep = Math.max( Math.max( nodes[r][0].up, nodes[r][0].rt ), nodes[r][0].dn );
             if( maxStep > maxGold ) {
                 maxGold = maxStep;
-                maxPaths = 1;
+                paths.clear();
+                paths.add(new ArrayList<>());
+                paths.get(0).add(new coord(r,0));
             }
             else if( maxStep == maxGold ) {
-                maxPaths++;
+                paths.add(new ArrayList<>());
+                paths.getLast().add(new coord(r,0));
             }
         }
+
+        dumpNodes(mine,nodes);
+
+        int maxPaths = 0;
+        if( maxGold > 0 ) {
+            maxPaths = 0;
+            for( int p = 0; p < paths.size(); p++ ) {
+                List<coord> path = paths.get(p);
+                int sum = 0;
+                for( int c = 0; c < cols; c++ ) {
+                    coord coords = path.get(c);
+                    if( c < path.size()) {
+                        sum += mine[coords.r][coords.c];    
+                    }
+                    if( c + 1 < cols && c + 1 == path.size()) {
+                        node nOde = nodes[coords.r][coords.c];
+                        int maxStep = Math.max( Math.max( nOde.up, nOde.rt ), nOde.dn );
+                        boolean up = maxStep == nOde.up;
+                        boolean rt = maxStep == nOde.rt;
+                        boolean dn = maxStep == nOde.dn;
+                        int subPaths = 0;
+                        subPaths += up ? 1 : 0;
+                        subPaths += rt ? 1 : 0;
+                        subPaths += dn ? 1 : 0;
+                        if( subPaths > 1 ) {
+                            if( up ) {
+                                path.add(new coord(coords.r-1,coords.c+1));
+                                if( rt ) {
+                                    List<coord> newPath = new ArrayList<>(path);
+                                    newPath.add(new coord(coords.r ,coords.c+1));
+                                    paths.add(newPath);
+                                }
+
+                                if( dn ) {
+                                    List<coord> newPath = new ArrayList<>(path);
+                                    newPath.add(new coord(coords.r+1,coords.c+1));
+                                    paths.add(newPath);
+
+                                }
+                            }
+                            else if( rt ) {
+                                path.add(new coord(coords.r ,coords.c+1));
+                                // dn:
+                                List<coord> newPath = new ArrayList<>(path);
+                                newPath.add(new coord(coords.r+1,coords.c+1));
+                                paths.add(newPath);
+
+
+                            }
+                        }
+                        else {
+                            if( up )
+                                path.add(new coord(coords.r-1,coords.c+1));
+                            else if( rt ) 
+                                path.add(new coord(coords.r ,coords.c+1));
+                            else // dn
+                                path.add(new coord(coords.r+1,coords.c+1));
+                        }
+                    }
+                }
+
+            }
+        }
+
+        maxPaths = paths.size();
 
         if( maxGold == 0 )
             System.out.println( "The mine is devoid of gold??");
         else
             System.out.println("Max gold \u001b[1m\u001b[103m\u001b[91m" + maxGold + "\u001b[0m in " + maxPaths + " path(s).");
+
+        for( int p = 0; p < maxPaths; p++ ) {
+            System.out.print("Path #" + p + ":");
+            List<coord> path = paths.get(p);
+            for( int s = 0; s < path.size(); s++ ) {
+                coord rc = path.get(s);
+                System.out.print( " [" + rc.r + ", " + rc.c + "]");
+            }
+            System.out.println();
+                
+        }
 
     }
 
@@ -93,6 +173,15 @@ public class JeffR_GoldMine
         int up; // up-and-right
         int rt; // straight-right
         int dn; // down-and-right
+    }
+
+    static class coord
+    {
+        int r, c;
+        coord(int r, int c) {
+            this.r = r;
+            this.c = c;
+        }
     }
 
     static void dumpNodes( int[][] mine, node[][] nodes ) {
@@ -135,7 +224,8 @@ public class JeffR_GoldMine
         // dig( mineAllOnes );
 
         int[][] mineSample = 
-            { { 0, 0, 0, 9 },
+            { 
+            { 0, 0, 0, 9 },
             { 0, 0, 0, 0 },
             { 0, 0, 0, 0 },
             { 1, 1, 1, 8 }
