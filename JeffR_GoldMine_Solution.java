@@ -3,7 +3,12 @@ import java.util.ArrayList;
 
 public class JeffR_GoldMine
 {
-    public static void dig( int[][] mine ) 
+
+    static boolean USE_ANSI = true;
+    static String ANSI_GOLD_PREFIX = USE_ANSI ? "\u001b[1m\u001b[103m\u001b[91m" : "";
+    static String ANSI_GOLD_SUFFIX = USE_ANSI ? "\u001b[0m" : "";
+    
+    static void dig( int[][] mine ) 
     {
         int rows = mine.length;
         int lr = rows - 1;
@@ -153,7 +158,7 @@ public class JeffR_GoldMine
         if( maxGold == 0 )
             System.out.println( "The mine is devoid of gold??");
         else
-            System.out.println("Max gold \u001b[1m\u001b[103m\u001b[91m" + maxGold + "\u001b[0m in " + maxPaths + " path(s).");
+            System.out.println("Max gold " + ANSI_GOLD_PREFIX + maxGold + ANSI_GOLD_SUFFIX + " in " + maxPaths + " path(s).");
 
         for( int p = 0; p < maxPaths; p++ ) {
             System.out.print("Path #" + p + ":");
@@ -167,9 +172,9 @@ public class JeffR_GoldMine
                 for( int c = 0; c < cols; c++ ) {
                     int value = mine[r][c];
                     if( path.contains(new coord(r,c)))
-                        System.out.printf( "\u001b[1m\u001b[103m\u001b[91m%3d\u001b[0m, ", value );
+                        System.out.printf( "%s%5d%s, ", ANSI_GOLD_PREFIX, value, ANSI_GOLD_SUFFIX );
                     else
-                        System.out.printf("%3d, ", value);
+                        System.out.printf("%5d, ", value);
                 }
                 System.out.println();
             }
