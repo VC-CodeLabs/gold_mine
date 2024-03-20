@@ -82,7 +82,7 @@ public class JeffR_GoldMine
         if( maxGold == 0 )
             System.out.println( "The mine is devoid of gold??");
         else
-            System.out.println("Max gold " + maxGold + " in " + maxPaths + " path(s).");
+            System.out.println("Max gold \u001b[1m" + maxGold + "\u001b[0m in " + maxPaths + " path(s).");
 
     }
 
