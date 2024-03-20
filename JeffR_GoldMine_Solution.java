@@ -144,7 +144,7 @@ public class JeffR_GoldMine
                         }
                     }
                 }
-
+                assert(sum == maxGold);
             }
         }
 
@@ -248,14 +248,14 @@ public class JeffR_GoldMine
 
     public static void main(String[] args) {
 
-        int[][] mineAllOnes = { { 1, 1, 1}, {1, 1, 1}, {1, 1, 1}};
+        int[][] mineAllOnes = { { 1, 1, 1}, {1, 1, 1}, {1, 1, 2}};
         dig( mineAllOnes );
 
         int[][] mineSample = 
             { 
             { 0, 0, 0, 10 },
-            { 0, 0, 0, 0 },
-            { 0, 0, 0, 0 },
+            { 0, 0, 0, 9 },
+            { 0, 0, 0, 8 },
             { 1, 1, 1, 8 }
             };
 
