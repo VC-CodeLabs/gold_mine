@@ -21,6 +21,13 @@ func goldRun(grid [][]int) int {
 
 	maxVal := -1
 
+	if numCols == 1 {
+		for row := 0; row < numRows; row++ {
+			maxVal = max(maxVal, grid[row][0])
+		}
+		return maxVal
+	}
+
 	for col := 1; col < numCols; col++ {
 		for row := 0; row < numRows; row++ {
 			maxBehind := grid[row][col-1]
