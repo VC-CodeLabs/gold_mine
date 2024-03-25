@@ -21,6 +21,9 @@ const RUN_TESTS = false
 // OPTIONAL- find the path(s) to max gold
 const FIND_PATHS = false
 
+// OPTIONAL- if we found path(s), print them out
+const SHOW_PATHS = false
+
 // OPTIONAL- pretty-print the paths to gold
 const USE_ANSI = false
 
@@ -236,7 +239,7 @@ func dig(mine [][]int) GoldMap {
 
 	maxPaths = len(paths)
 
-	if FIND_PATHS {
+	if FIND_PATHS && SHOW_PATHS {
 		for p := 0; p < maxPaths; p++ {
 			fmt.Print("Path #", p+1, ":")
 			var path = paths[p]
@@ -248,10 +251,18 @@ func dig(mine [][]int) GoldMap {
 			for r := 0; r < rows; r++ {
 				for c := 0; c < cols; c++ {
 					var value = mine[r][c]
-					if slices.IndexFunc(path, func(tc coord) bool { return tc.r == r && tc.c == c }) != -1 {
-						fmt.Printf("%s%5d%s, ", ANSI_GOLD_PREFIX(), value, ANSI_GOLD_SUFFIX())
+					if USE_ANSI {
+						if slices.IndexFunc(path, func(tc coord) bool { return tc.r == r && tc.c == c }) != -1 {
+							fmt.Printf("%s%5d%s, ", ANSI_GOLD_PREFIX(), value, ANSI_GOLD_SUFFIX())
+						} else {
+							fmt.Printf("%5d, ", value)
+						}
 					} else {
-						fmt.Printf("%5d, ", value)
+						if slices.IndexFunc(path, func(tc coord) bool { return tc.r == r && tc.c == c }) != -1 {
+							fmt.Printf("%5d, ", value)
+						} else {
+							fmt.Printf("%5s, ", "*")
+						}
 					}
 				}
 				fmt.Println()
@@ -587,43 +598,95 @@ func testTallSkinnyMine() {
 }
 
 func testMaxMine() {
+
+	s := time.Now()
+
 	fmt.Println()
 	fmt.Println("Testing maximum mine (by size)...")
 
 	const MAX_ROWS = 1000
 	const MAX_COLS = 1000
 	const MAX_GOLD = 9872
+	const STEP = 100
+	const MODES = 5
 
-	var goldLeft = MAX_GOLD
+	var passed = 0
 
-	fmt.Print("Building max mine...")
-	var maxMine = make([][]int, MAX_ROWS)
-	for r := 0; r < MAX_ROWS; r++ {
-		maxMine[r] = make([]int, MAX_COLS)
-		for c := 0; c < MAX_COLS; c++ {
-			if goldLeft > 0 && (r == c || /* rectangular: */ (r == MAX_ROWS-1 && c > r)) {
-				if (r == MAX_ROWS-1 || /* rectangular: */ r == c) && c == MAX_COLS-1 {
-					maxMine[r][c] = goldLeft
-					goldLeft = 0
-				} else {
-					maxMine[r][c] = 1
-					goldLeft--
+	for MR := STEP; MR <= MAX_ROWS; MR += STEP {
+		for MC := STEP; MC <= MAX_COLS; MC += STEP {
+			for MODE := 0; MODE < MODES; MODE++ {
+
+				var totalGold = 0
+				var goldLeft = MAX_GOLD
+				var nuggetCounter = 0
+
+				fmt.Println()
+				fmt.Printf("Building max mine %dx%d mode %d...", MR, MC, MODE)
+				var expectedPath = [][]coord{{}}
+				var maxMine = make([][]int, MR)
+				for r := 0; r < MR; r++ {
+					maxMine[r] = make([]int, MC)
+					for c := 0; c < MC; c++ {
+						if goldLeft > 0 && (r == c || /* rectangular: */ (r == MR-1 && c > r)) {
+							switch MODE {
+							case 0:
+								if (r == MR-1 || /* rectangular: */ r == c) && c == MC-1 {
+									maxMine[r][c] = goldLeft
+									totalGold += goldLeft
+									goldLeft = 0
+								} else {
+									maxMine[r][c] = 1
+									totalGold++
+									goldLeft--
+								}
+							case 1:
+								maxMine[r][c] = 1
+								totalGold++
+							case 2:
+								maxMine[r][c] = MAX_GOLD
+								totalGold += MAX_GOLD
+							case 3:
+								nuggetCounter++
+								maxMine[r][c] = min(MAX_GOLD, nuggetCounter)
+								totalGold += maxMine[r][c]
+							case 4:
+								nuggetCounter++
+								maxMine[r][c] = max(MAX_GOLD, MAX_GOLD-nuggetCounter+1)
+								totalGold += maxMine[r][c]
+
+							}
+							var newStep = coord{r, c}
+							expectedPath[0] = append(expectedPath[0], newStep)
+						} else {
+							maxMine[r][c] = 0
+						}
+
+					}
 				}
-			} else {
-				maxMine[r][c] = 0
-			}
 
+				fmt.Println("completed.")
+
+				var goldMap = dig(maxMine)
+
+				assert(goldMap.maxGold == totalGold, fmt.Sprintf("maxGold: Expected %d Actual %d", totalGold, goldMap.maxGold))
+
+				if FIND_PATHS {
+					assert(len(goldMap.paths) == 1, fmt.Sprintf("#paths: Expected %d Actual %d", 1, len(goldMap.paths)))
+					assert(reflect.DeepEqual(goldMap.paths, expectedPath), fmt.Sprintf("paths mismatch"))
+				}
+
+				passed++
+				fmt.Printf("...maxMine test #%d %dx%d mode %d passed.", passed, MR, MC, MODE)
+				fmt.Println()
+			}
 		}
 	}
-	fmt.Println("completed.")
 
-	var goldMap = dig(maxMine)
+	d := time.Since(s)
 
-	assert(goldMap.maxGold == MAX_GOLD-goldLeft, fmt.Sprintf("maxGold: Expected %d Actual %d", MAX_GOLD-goldLeft, goldMap.maxGold))
-
-	if FIND_PATHS {
-		assert(len(goldMap.paths) == 1, fmt.Sprintf("#paths: Expected %d Actual %d", 1, len(goldMap.paths)))
-	}
+	fmt.Println()
+	fmt.Printf("...maxMine %d test(s) passed in %s.", passed, d)
+	fmt.Println()
 
 }
 
