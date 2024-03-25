@@ -2,34 +2,41 @@ package main
 
 import (
 	"fmt"
+	"reflect"
 	"slices"
+	"time"
 )
 
-const FIND_PATHS = true
-
-const USE_ANSI = true
-
-func ANSI_GOLD_PREFIX() string {
-	if USE_ANSI {
-		return "\u001b[1m\u001b[103m\u001b[91m"
-	} else {
-		return ""
-	}
-
-}
-func ANSI_GOLD_SUFFIX() string {
-
-	if USE_ANSI {
-		return "\u001b[0m"
-	} else {
-		return ""
-	}
+// ALEK- here's the default grid to update w/ your test(s)
+var GOLD_GRID = [][]int{
+	{1, 3, 3},
+	{2, 1, 4},
+	{0, 6, 4},
 }
 
-func dig(mine [][]int) {
+// if enabled, RUN_TESTS skips the default GOLD_GRID above
+// and instead runs various tests w/ validation
+const RUN_TESTS = false
+
+// OPTIONAL- find the path(s) to max gold
+const FIND_PATHS = false
+
+// OPTIONAL- pretty-print the paths to gold
+const USE_ANSI = false
+
+func dig(mine [][]int) GoldMap {
+	s := time.Now()
 	var rows = len(mine)
+	if rows == 0 {
+		fmt.Println("Mine is void (nil or {})")
+		return GoldMap{0, nil}
+	}
 	var lr = rows - 1
 	var cols = len(mine[0])
+	if cols == 0 {
+		fmt.Println("Mine has no content ({{}})")
+		return GoldMap{0, nil}
+	}
 	var lc = cols - 1
 
 	var nodes [][]node = make([][]node, rows)
@@ -119,27 +126,29 @@ func dig(mine [][]int) {
 
 	// dumpNodes(mine, nodes)
 
-	var maxGold = -1
-	var paths [][]coord = make([][]coord, 0)
+	var maxGold = 0
+	var paths [][]coord // = make([][]coord, 0)
 	for r := 0; r < rows; r++ {
 		var maxStep = mine[r][0] + max(max(nodes[r][0].up, nodes[r][0].rt), nodes[r][0].dn)
-		if maxStep > maxGold {
-			maxGold = maxStep
-			if FIND_PATHS {
-				paths = make([][]coord, 1) // paths.clear()
-				paths[0] = make([]coord, 1)
-				paths[0][0].r = r
-				paths[0][0].c = 0
-				// paths.get(0).add(new coord(r,0));
-			}
-		} else if maxStep == maxGold {
-			if FIND_PATHS {
-				var newPath = make([]coord, 1)
-				newPath[0].r = r
-				newPath[0].c = 0
-				paths = append(paths, newPath)
-				// paths.add(new ArrayList<>());
-				// paths.getLast().add(new coord(r,0));
+		if maxStep > 0 {
+			if maxStep > maxGold {
+				maxGold = maxStep
+				if FIND_PATHS {
+					paths = make([][]coord, 1) // paths.clear()
+					paths[0] = make([]coord, 1)
+					paths[0][0].r = r
+					paths[0][0].c = 0
+					// paths.get(0).add(new coord(r,0));
+				}
+			} else if maxStep == maxGold {
+				if FIND_PATHS {
+					var newPath = make([]coord, 1)
+					newPath[0].r = r
+					newPath[0].c = 0
+					paths = append(paths, newPath)
+					// paths.add(new ArrayList<>());
+					// paths.getLast().add(new coord(r,0));
+				}
 			}
 		}
 	}
@@ -227,21 +236,9 @@ func dig(mine [][]int) {
 
 	maxPaths = len(paths)
 
-	if maxGold == 0 {
-		fmt.Print("The mine is devoid of gold??")
-	} else {
-		fmt.Print("Max gold ", ANSI_GOLD_PREFIX(), maxGold, ANSI_GOLD_SUFFIX())
-
-		if FIND_PATHS {
-			fmt.Print(" in ", maxPaths, " path(s).")
-		}
-	}
-
-	fmt.Println()
-
 	if FIND_PATHS {
 		for p := 0; p < maxPaths; p++ {
-			fmt.Print("Path #", p, ":")
+			fmt.Print("Path #", p+1, ":")
 			var path = paths[p]
 			for s := 0; s < len(path); s++ {
 				var rc = path[s]
@@ -264,6 +261,25 @@ func dig(mine [][]int) {
 		}
 	}
 
+	d := time.Since(s)
+
+	if maxGold == 0 {
+		fmt.Print("The mine is devoid of gold??")
+	} else {
+		fmt.Print("Max gold ", ANSI_GOLD_PREFIX(), maxGold, ANSI_GOLD_SUFFIX())
+
+		if FIND_PATHS {
+			fmt.Print(" in ", maxPaths, " path(s).")
+		}
+	}
+
+	fmt.Printf(" completed in %s", d)
+
+	fmt.Println()
+
+	// report our findings
+	return GoldMap{maxGold, paths}
+
 }
 
 type node struct {
@@ -275,6 +291,12 @@ type node struct {
 type coord struct {
 	r int // row
 	c int // column
+}
+
+// the GoldMap is used to report the results of our search
+type GoldMap struct {
+	maxGold int
+	paths   [][]coord
 }
 
 func dumpNodes(mine [][]int, nodes [][]node) {
@@ -326,12 +348,78 @@ func dumpNodes(mine [][]int, nodes [][]node) {
 
 func main() {
 
+	if RUN_TESTS {
+		runTests()
+	} else {
+		fmt.Println("Using built-in GOLD_GRID")
+		dig(GOLD_GRID)
+	}
+}
+
+func ANSI_GOLD_PREFIX() string {
+	if USE_ANSI {
+		return "\u001b[1m\u001b[103m\u001b[91m"
+	} else {
+		return ""
+	}
+
+}
+func ANSI_GOLD_SUFFIX() string {
+
+	if USE_ANSI {
+		return "\u001b[0m"
+	} else {
+		return ""
+	}
+}
+
+func runTests() {
+	fmt.Println("Running tests...")
+	//// my examples
+	const TEST_EXTRA_EXAMPLES = true
+	if TEST_EXTRA_EXAMPLES {
+		testAllOnes()
+		testMultiPath()
+		testJustOneNugget()
+	}
+
+	//// examples from README
+	const TEST_EXAMPLES = true
+	if TEST_EXAMPLES {
+		testExample1()
+		testExample2()
+		testExample3()
+	}
+
+	//// edge cases
+	const TEST_EDGE_CASES = true
+	if TEST_EDGE_CASES {
+		testNilMine()
+		testEmptyMine()
+		testEmptyMine2()
+		testOneDMineNoNuggets()
+		testOneDMineOneNugget()
+		testFlatShallowMine()
+		testTallSkinnyMine()
+	}
+
+	//// manufacture max (by dims & total gold) mine
+	const TEST_MAX_MINE = true
+	if TEST_MAX_MINE {
+		testMaxMine()
+	}
+}
+
+func testAllOnes() {
 	mineAllOnes := [][]int{
 		{1, 1, 1},
 		{1, 1, 1},
-		{1, 1, 2},
+		{1, 1, 1},
 	}
 	dig(mineAllOnes)
+}
+
+func testMultiPath() {
 
 	mineSample := [][]int{
 		{0, 0, 0, 10},
@@ -341,13 +429,207 @@ func main() {
 	}
 
 	dig(mineSample)
+}
 
+func testJustOneNugget() {
 	justOne := [][]int{
 		{0, 0, 1},
 		{0, 0, 0},
-		{1, 0, 0},
+		{0, 0, 0},
 	}
 
 	dig(justOne)
+}
 
+func testExample1() {
+	var example1 = [][]int{
+		{1, 3, 3},
+		{2, 1, 4},
+		{0, 6, 4},
+	}
+
+	dig(example1)
+
+}
+
+func testExample2() {
+	fmt.Println()
+	fmt.Println("Testing example 2...")
+
+	var example2 = [][]int{
+		{1, 3, 1, 5},
+		{2, 2, 4, 1},
+		{5, 0, 2, 3},
+		{0, 6, 1, 2}}
+
+	var goldMap = dig(example2)
+
+	assert(goldMap.maxGold == 16, fmt.Sprintf("maxGold: Expected %d Actual %d", 16, goldMap.maxGold))
+
+	if FIND_PATHS {
+		assert(len(goldMap.paths) == 2, fmt.Sprintf("#paths: Expected %d Actual %d", 2, len(goldMap.paths)))
+
+		var EXPECTED_PATHS = [][]coord{
+			{{2, 0}, {1, 1}, {1, 2}, {0, 3}},
+			{{2, 0}, {3, 1}, {2, 2}, {2, 3}},
+		}
+		assert(reflect.DeepEqual(goldMap.paths, EXPECTED_PATHS), fmt.Sprintf("paths mismatch"))
+	}
+
+	fmt.Println("...example 2 Passed.")
+}
+
+func testExample3() {
+	fmt.Println()
+	fmt.Println("Testing example 3...")
+
+	var example3 = [][]int{
+		{10, 33, 13, 15},
+		{22, 21, 04, 1},
+		{5, 0, 2, 3},
+		{0, 6, 14, 2}}
+
+	var goldMap = dig(example3)
+
+	assert(goldMap.maxGold == 83, fmt.Sprintf("maxGold: Expected %d Actual %d", 83, goldMap.maxGold))
+
+	if FIND_PATHS {
+		assert(len(goldMap.paths) == 1, fmt.Sprintf("#paths: Expected %d Actual %d", 1, len(goldMap.paths)))
+
+		var EXPECTED_PATHS = [][]coord{
+			{{1, 0}, {0, 1}, {0, 2}, {0, 3}},
+		}
+		assert(reflect.DeepEqual(goldMap.paths, EXPECTED_PATHS), fmt.Sprintf("paths mismatch"))
+	}
+
+	fmt.Println("...example 3 Passed.")
+}
+
+func testNilMine() {
+
+	fmt.Println()
+	fmt.Println("Testing nil mine...")
+
+	var nilMine [][]int
+
+	var goldMap = dig(nilMine)
+	assert(goldMap.maxGold == 0, fmt.Sprintf("maxGold: Expected %d Actual %d", 0, goldMap.maxGold))
+	assert(goldMap.paths == nil, fmt.Sprintf("paths != nil"))
+}
+
+func testEmptyMine() {
+	fmt.Println()
+	fmt.Println("Testing empty mine {}...")
+
+	var emptyMine = [][]int{}
+
+	var goldMap = dig(emptyMine)
+	assert(goldMap.maxGold == 0, fmt.Sprintf("maxGold: Expected %d Actual %d", 0, goldMap.maxGold))
+	assert(goldMap.paths == nil, fmt.Sprintf("paths != nil"))
+
+}
+
+func testEmptyMine2() {
+	fmt.Println()
+	fmt.Println("Testing empty mine {{}}...")
+
+	var emptyMine = [][]int{{}}
+
+	var goldMap = dig(emptyMine)
+	assert(goldMap.maxGold == 0, fmt.Sprintf("maxGold: Expected %d Actual %d", 0, goldMap.maxGold))
+	assert(goldMap.paths == nil, fmt.Sprintf("paths != nil"))
+}
+
+func testOneDMineNoNuggets() {
+	fmt.Println()
+	fmt.Println("Testing one-d mine no nuggets {{0}}...")
+
+	var oneDMineNoNuggets = [][]int{{0}}
+
+	var goldMap = dig(oneDMineNoNuggets)
+	assert(goldMap.maxGold == 0, fmt.Sprintf("maxGold: Expected %d Actual %d", 0, goldMap.maxGold))
+
+}
+
+func testOneDMineOneNugget() {
+	fmt.Println()
+	fmt.Println("Testing one-d mine one nugget {{1}}...")
+
+	var oneDMineNoNuggets = [][]int{{1}}
+
+	var goldMap = dig(oneDMineNoNuggets)
+	assert(goldMap.maxGold == 1, fmt.Sprintf("maxGold: Expected %d Actual %d", 1, goldMap.maxGold))
+
+}
+
+func testFlatShallowMine() {
+	fmt.Println()
+	fmt.Println("Testing shallow mine 1x3...")
+
+	var oneDMineNoNuggets = [][]int{{1, 2, 3}}
+
+	var goldMap = dig(oneDMineNoNuggets)
+
+	assert(goldMap.maxGold == 6, fmt.Sprintf("maxGold: Expected %d Actual %d", 6, goldMap.maxGold))
+
+}
+
+func testTallSkinnyMine() {
+	fmt.Println()
+	fmt.Println("Testing skinny mine 3x1...")
+
+	var oneDMineNoNuggets = [][]int{{1}, {2}, {3}}
+
+	var goldMap = dig(oneDMineNoNuggets)
+
+	assert(goldMap.maxGold == 3, fmt.Sprintf("maxGold: Expected %d Actual %d", 3, goldMap.maxGold))
+
+}
+
+func testMaxMine() {
+	fmt.Println()
+	fmt.Println("Testing maximum mine (by size)...")
+
+	const MAX_ROWS = 1000
+	const MAX_COLS = 1000
+	const MAX_GOLD = 9872
+
+	var goldLeft = MAX_GOLD
+
+	fmt.Print("Building max mine...")
+	var maxMine = make([][]int, MAX_ROWS)
+	for r := 0; r < MAX_ROWS; r++ {
+		maxMine[r] = make([]int, MAX_COLS)
+		for c := 0; c < MAX_COLS; c++ {
+			if goldLeft > 0 && (r == c || /* rectangular: */ (r == MAX_ROWS-1 && c > r)) {
+				if (r == MAX_ROWS-1 || /* rectangular: */ r == c) && c == MAX_COLS-1 {
+					maxMine[r][c] = goldLeft
+					goldLeft = 0
+				} else {
+					maxMine[r][c] = 1
+					goldLeft--
+				}
+			} else {
+				maxMine[r][c] = 0
+			}
+
+		}
+	}
+	fmt.Println("completed.")
+
+	var goldMap = dig(maxMine)
+
+	assert(goldMap.maxGold == MAX_GOLD-goldLeft, fmt.Sprintf("maxGold: Expected %d Actual %d", MAX_GOLD-goldLeft, goldMap.maxGold))
+
+	if FIND_PATHS {
+		assert(len(goldMap.paths) == 1, fmt.Sprintf("#paths: Expected %d Actual %d", 1, len(goldMap.paths)))
+	}
+
+}
+
+// ///////////////////////////////////////////
+func assert(cond bool, msg string) {
+	if !cond {
+		panic(msg)
+	}
 }
