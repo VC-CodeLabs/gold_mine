@@ -1,9 +1,7 @@
 package main
 
 import (
-	"fmt"
 	"log"
-	"time"
 )
 
 type Mine [][]*Node
@@ -19,13 +17,9 @@ func main() {
 }
 
 func goldMine(input [][]int) int {
-	start := time.Now()
-
 	mine := parseInput(input)
 
 	result := search(mine)
-
-	fmt.Printf("Execution took %vns\n", time.Since(start).Nanoseconds())
 
 	return result
 }
